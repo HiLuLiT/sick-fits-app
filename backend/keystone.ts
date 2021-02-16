@@ -1,59 +1,56 @@
-import 'dotenv/config';
+import { createAuth } from '@keystone-next/auth';
 import { config, createSchema } from '@keystone-next/keystone/schema';
-import { createAuth } from "@keystone-next/auth";
-import { User } from "./schemas/User";
-import { statelessSessions, withItemData } from "@keystone-next/keystone/session";
+import {
+  withItemData,
+  statelessSessions,
+} from '@keystone-next/keystone/session';
+import { User } from './schemas/User';
+import 'dotenv/config';
 
 const databaseURL =
   process.env.DATABASE_URL || 'mongodb://localhost/keystone-sick-fits-tutorial';
 
 const sessionConfig = {
-  maxAge: 60 * 60 * 24 * 360, // how long should they stay signed in
+  maxAge: 60 * 60 * 24 * 360, // How long they stay signed in?
   secret: process.env.COOKIE_SECRET,
 };
 
-const {withAuth} = createAuth({
-    // which schema
+const { withAuth } = createAuth({
   listKey: 'User',
-    // which field in user
   identityField: 'email',
-    // ask for this field when typed in
   secretField: 'password',
-    // setup for first time before users are created
   initFirstItem: {
     fields: ['name', 'email', 'password'],
-    // TODO: add in initial roles here
-  }
-})
+    // TODO: Add in inital roles here
+  },
+});
 
-export default withAuth(config({
-  server: {
-    cors: {
-      origin: [process.env.FRONTEND_URL],
-      credentials: true,
+export default withAuth(
+  config({
+    server: {
+      cors: {
+        origin: [process.env.FRONTEND_URL],
+        credentials: true,
+      },
     },
-  },
-  db: {
-    adapter: 'mongoose',
-    url: databaseURL,
-    // TODO: add data seeding here
-  },
-  lists: createSchema({
-    User,
-    // Schema items go in here
-  }),
-  ui: {
-    // Show the UI only for people who pass this test
-    isAccessAllowed: ({ session }) => {
-      console.log('session:', session);
-      // shorthand for if there's session && session.data
-      // !! returns boolean
-      return !!session?.data
-    }
-  },
-  session: withItemData(statelessSessions(sessionConfig), {
-      // pass this data in every session
-    // GraphQL Query
-    User: 'id name email'
-})
-}));
+    db: {
+      adapter: 'mongoose',
+      url: databaseURL,
+      // TODO: Add data seeding here
+    },
+    lists: createSchema({
+      // Schema items go in here
+      User,
+    }),
+    ui: {
+      // Show the UI only for poeple who pass this test
+      isAccessAllowed: ({ session }) =>
+        // console.log(session);
+        !!session?.data,
+    },
+    session: withItemData(statelessSessions(sessionConfig), {
+      // GraphQL Query
+      User: 'id name email',
+    }),
+  })
+);
