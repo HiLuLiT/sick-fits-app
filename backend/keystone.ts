@@ -13,9 +13,13 @@ const sessionConfig = {
 };
 
 const {withAuth} = createAuth({
+    // which schema
   listKey: 'User',
+    // which field in user
   identityField: 'email',
+    // ask for this field when typed in
   secretField: 'password',
+    // setup for first time before users are created
   initFirstItem: {
     fields: ['name', 'email', 'password'],
     // TODO: add in initial roles here
@@ -48,7 +52,8 @@ export default withAuth(config({
     }
   },
   session: withItemData(statelessSessions(sessionConfig), {
+      // pass this data in every session
     // GraphQL Query
-    User: 'id'
+    User: 'id name email'
 })
 }));
